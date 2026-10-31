@@ -7,7 +7,9 @@ import { UserProvider } from "./context/UserContext";
 import { ProductProvider } from "./context/ProductContext";
 import { CartProvider } from "./context/CartContext";
 
-export const server = "https://shophub-ecommerce-server-2026.onrender.com";
+// export const server = "https://shophub-ecommerce-server-2026.onrender.com";
+
+const server = "https://localhost:5000";
 
 export const categories = [
   "smartphone",

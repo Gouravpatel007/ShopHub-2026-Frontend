@@ -146,7 +146,7 @@ import toast, { Toaster } from "react-hot-toast";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [btnLoading, setBtnLoading] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
@@ -160,7 +160,7 @@ export const UserProvider = ({ children }) => {
         email,
       });
 
-      localStorage.setItem("email", email);
+      localStorage.setItem("email", email.trim().toLowerCase());
 
       toast.success(data.message);
       navigate("/verify");
@@ -173,7 +173,7 @@ export const UserProvider = ({ children }) => {
     }
   }
 
-  // Verify OTP and login
+  // Verify OTP and Login
   async function verifyUser(otp, navigate, fetchCart) {
     setBtnLoading(true);
 
@@ -181,7 +181,6 @@ export const UserProvider = ({ children }) => {
 
     if (!email) {
       toast.error("Please enter your email again");
-
       setBtnLoading(false);
       return;
     }
@@ -192,8 +191,8 @@ export const UserProvider = ({ children }) => {
         otp,
       });
 
-      if (!data.token) {
-        throw new Error("Authentication token was not received");
+      if (!data.token || !data.user) {
+        throw new Error("Authentication data not received");
       }
 
       // Save token
@@ -218,7 +217,10 @@ export const UserProvider = ({ children }) => {
 
       navigate("/");
     } catch (error) {
-      console.error("OTP Verification Error:", error.response?.data || error);
+      console.error(
+        "OTP Verification Error:",
+        error.response?.data || error
+      );
 
       toast.error(
         error.response?.data?.message ||
@@ -230,13 +232,13 @@ export const UserProvider = ({ children }) => {
     }
   }
 
-  // Fetch logged-in user
+  // Fetch Logged-in User
   async function fetchUser() {
     const token = Cookies.get("token");
 
     if (!token) {
       setIsAuth(false);
-      setUser([]);
+      setUser(null);
       setLoading(false);
       return;
     }
@@ -258,7 +260,7 @@ export const UserProvider = ({ children }) => {
 
       Cookies.remove("token", { path: "/" });
 
-      setUser([]);
+      setUser(null);
       setIsAuth(false);
     } finally {
       setLoading(false);
@@ -269,7 +271,7 @@ export const UserProvider = ({ children }) => {
   function logoutUser(navigate, setTotalItem) {
     Cookies.remove("token", { path: "/" });
 
-    setUser([]);
+    setUser(null);
     setIsAuth(false);
 
     if (typeof setTotalItem === "function") {
@@ -294,6 +296,7 @@ export const UserProvider = ({ children }) => {
         loginUser,
         verifyUser,
         logoutUser,
+        fetchUser,
       }}
     >
       {children}
